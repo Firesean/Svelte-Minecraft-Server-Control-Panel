@@ -100,7 +100,7 @@ async function getPlayerInventories(rcon, player, uuid) {
 
   try {
     // Create a folder for the player's name, including parent directories
-    await mkdir(`./src/players/${player}-${uuid}`, { recursive: true });
+    // await mkdir(`./src/players/${player}-${uuid}`, { recursive: true });
 
     // Get the player's inventory data
     let response, item, entityData;
