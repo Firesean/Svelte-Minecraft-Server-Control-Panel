@@ -2,10 +2,12 @@ import { Rcon } from 'rcon-client';
 import { mkdir, writeFile } from "fs/promises";
 import { json } from '@sveltejs/kit';
 
+import { RCON_HOST, RCON_PORT, RCON_PASSWORD } from '$env/static/private';
+
 const options = {
-  host: process.env.RCON_HOST, // Replace with your server IP
-  port: process.env.RCON_PORT, // Replace with your RCON port
-  password: process.env.RCON_PASSWORD, // Replace with your RCON password
+  host: RCON_HOST, // Replace with your server IP
+  port: RCON_PORT, // Replace with your RCON port
+  password: RCON_PASSWORD, // Replace with your RCON password
   timeout: 30000,
 };
 
@@ -26,6 +28,9 @@ const commands = {
 
 export async function POST({ request }) {
   console.log('Request Received!');
+  console.log(RCON_HOST);
+  console.log(RCON_PORT);
+  console.log(RCON_PASSWORD);
   const data = await request.json();
   console.log(data.action);
 
