@@ -6,9 +6,9 @@ export default defineConfig(({ command, mode }) => {
   return {
     plugins: [svelte()],
     define: {
-      'process.env.RCON_PASSWORD': JSON.stringify(env.RCON_PASSWORD),
-      'process.env.RCON_PORT': JSON.stringify(env.RCON_PORT),
-      'process.env.RCON_HOST': JSON.stringify(env.RCON_HOST),
+      'process.env.RCON_PASSWORD': env.RCON_PASSWORD,
+      'process.env.RCON_PORT': env.RCON_PORT,
+      'process.env.RCON_HOST': env.RCON_HOST,
     },
   };
 });
