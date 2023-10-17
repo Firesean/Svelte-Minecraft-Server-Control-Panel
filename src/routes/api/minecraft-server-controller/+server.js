@@ -1,14 +1,12 @@
-import dotenv from 'dotenv';
 import { Rcon } from 'rcon-client';
 import { mkdir, writeFile } from "fs/promises";
 import { json } from '@sveltejs/kit';
 
-dotenv.config();
 
 const options = {
-  host: process.env.RCON_HOST, // Replace with your server IP
-  port: process.env.RCON_PORT, // Replace with your RCON port
-  password: process.env.RCON_PASSWORD, // Replace with your RCON password
+  host: import.meta.env.RCON_HOST, // Replace with your server IP
+  port: import.meta.env.RCON_PORT, // Replace with your RCON port
+  password: import.meta.env.RCON_PASSWORD, // Replace with your RCON password
   timeout: 30000,
 };
 
