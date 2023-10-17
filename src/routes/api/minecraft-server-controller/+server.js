@@ -1,9 +1,6 @@
-import dotenv from 'dotenv';
 import { Rcon } from 'rcon-client';
 import { mkdir, writeFile } from "fs/promises";
 import { json } from '@sveltejs/kit';
-
-dotenv.config();
 
 const options = {
   host: process.env.RCON_HOST, // Replace with your server IP
