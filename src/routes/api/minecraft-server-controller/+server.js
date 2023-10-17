@@ -28,9 +28,6 @@ const commands = {
 
 export async function POST({ request }) {
   console.log('Request Received!');
-  console.log(RCON_HOST);
-  console.log(RCON_PORT);
-  console.log(RCON_PASSWORD);
   const data = await request.json();
   console.log(data.action);
 
@@ -132,8 +129,8 @@ async function getPlayerInventories(rcon, player, uuid) {
     let jsonData = JSON.stringify(data, null, 2);
 
     // Write the data to a file named storage.json
-    await writeFile(`./src/players/${player}-${uuid}/storage.json`, jsonData, "utf-8"); // Join the data array with newlines
-    console.log(`Inventory data for ${player} saved successfully.`);
+    // await writeFile(`./src/players/${player}-${uuid}/storage.json`, jsonData, "utf-8"); // Join the data array with newlines
+    // console.log(`Inventory data for ${player} saved successfully.`);
     return jsonData;
   } catch (err) {
     console.error('Error:', err);
