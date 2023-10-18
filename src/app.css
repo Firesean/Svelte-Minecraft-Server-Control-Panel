@@ -16,7 +16,7 @@ h2 {
 }
 
 .minecraft-item{
-    @apply w-[100%] h-[100%];
+    @apply w-[8rem] h-[8rem];
 }
 
 .inventory {
