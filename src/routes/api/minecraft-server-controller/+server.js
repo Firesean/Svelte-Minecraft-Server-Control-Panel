@@ -1,8 +1,11 @@
 import { Rcon } from 'rcon-client';
-import { mkdir, writeFile } from "fs/promises";
 import { json } from '@sveltejs/kit';
+import { createClient } from '@supabase/supabase-js'
+import { RCON_HOST, RCON_PORT, RCON_PASSWORD, SUPABASE_KEY, SUPABASE_URL } from '$env/static/private';
+const supabaseUrl = SUPABASE_URL;
+const supabaseKey = SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-import { RCON_HOST, RCON_PORT, RCON_PASSWORD } from '$env/static/private';
 
 const options = {
   host: RCON_HOST, // Replace with your server IP
@@ -31,17 +34,27 @@ export async function POST({ request }) {
   const data = await request.json();
   console.log(data.action);
 
+
   await rcon.connect();
 
   try {
     switch (data.action) {
       case "retrievePlayers":
           const players = await getPlayers(rcon);
-          console.log(players);
+
+          const dataArrayToInsert = Object.keys(players).map((username) => ({
+            username,
+            uuid: players[username],
+          }));
+          
+          await supabase
+          .from('players')
+          .upsert(dataArrayToInsert);
+        
           return json({status: 200, message: "Players retrieved successfully", data: players});
       case "retrieveInventories":
         const inventories = await getPlayerInventories(rcon, data.player, data.uuid);
-        console.log(inventories);
+        // console.log(inventories);
         return json({status: 200, message: `Inventories for ${data.player} retrieved successfully`, data: inventories});
       default:
         return json({
@@ -68,73 +81,116 @@ async function getPlayers(rcon) {
   let response = await rcon.send(commands.list);
   const regex = /There are (\d+) of a max of (\d+) players online: (.+)$/;
   const match = response.match(regex);
-  const playerObject = {};
+  const playerObject = {
+    onlinePlayers: {},
+    offlinePlayers: {},
+  };
 
   if (match) {
     const playerNames = match[3].split(', ');
 
     playerNames.forEach((name) => {
       // Use a regular expression to match the username and UUID
-      const match = name.match(/^(.*?) \((.*?)\)$/);
+      const nameMatch = name.match(/^(.*?) \((.*?)\)$/);
 
-      if (match) {
+      if (nameMatch) {
         // Extract the username and UUID from the match
-        const username = match[1];
-        const uuid = match[2];
+        const username = nameMatch[1];
+        const uuid = nameMatch[2];
 
         // Add the entry to the playerObject
-        playerObject[username] = uuid;
+        playerObject.onlinePlayers[username] = uuid;
       }
     });
   }
 
+  const onlinePlayerUUIDs = Object.values(playerObject.onlinePlayers);
+
+  if (onlinePlayerUUIDs.length != 0){
+    response = await supabase
+        .from('players')
+        .select('username, uuid')
+        .not('uuid', 'eq', onlinePlayerUUIDs);
+  }
+  else{
+    response = await supabase
+      .from('players')
+      .select('username, uuid');
+  }
+
+  console.log(response);
+
+  // Transform the array into the desired object structure
+  if (response.data){
+    const transformedPlayers = response.data.reduce((acc, player) => {
+      acc[player.username] = player.uuid;
+      return acc;
+    }, {});
+
+    playerObject.offlinePlayers = transformedPlayers;
+  }
   return playerObject;
 }
 
 async function getPlayerInventories(rcon, player, uuid) {
   const regexPattern = /has the following entity data: (.*)/;
   let data = {
-    "Inventory" : [],
-    "Enderchest" : [],
+    enderchest: [],
+    inventory: [],
   };
 
   try {
-    // Create a folder for the player's name, including parent directories
-    // await mkdir(`./src/players/${player}-${uuid}`, { recursive: true });
+    let response;
 
-    // Get the player's inventory data
-    let response, item, entityData;
     for (let i = 0; i < 41; i++) {
       response = await rcon.send(commands.playerInventory(player) + "[" + i.toString() + "]");
-      item = response.match(regexPattern);
+      const item = response.match(regexPattern);
 
       if (item) {
-        entityData = item[1].trim(); // Extracted entity data
-        data.Inventory.push(entityData);
+        const entityData = item[1].trim();
+        data.inventory.push(entityData);
       }
     }
 
-    // Get the player's enderchest data
     for (let i = 0; i < 27; i++) {
       response = await rcon.send(commands.playerEnderchest(player) + "[" + i.toString() + "]");
-      item = response.match(regexPattern);
+      const item = response.match(regexPattern);
 
       if (item) {
-        entityData = item[1].trim(); // Extracted entity data
-        // console.log(entityData);
-        data.Enderchest.push(entityData);
+        const entityData = item[1].trim();
+        data.enderchest.push(entityData);
       }
     }
 
-    let jsonData = JSON.stringify(data, null, 2);
+    const jsonData = JSON.stringify(data, null, 2);
+    
+    console.log(jsonData);
 
-    // Write the data to a file named storage.json
-    // await writeFile(`./src/players/${player}-${uuid}/storage.json`, jsonData, "utf-8"); // Join the data array with newlines
-    // console.log(`Inventory data for ${player} saved successfully.`);
+    if (data.inventory.length > 0 || data.enderchest.length > 0) {
+      console.log("Retrieving Inventories from In-game");
+      await supabase
+        .from("inventories")
+        .upsert([
+          {
+            player_uuid: uuid,
+            inventory: data.inventory,
+            enderchest: data.enderchest,
+          },
+        ]);
+    }
+
+    else {
+      console.log("Retrieving Inventories from Database");
+      response = await supabase
+        .from("inventories")
+        .select("enderchest, inventory")
+        .eq("player_uuid", uuid);
+      return JSON.stringify(response.data[0], null, 2);
+    }
+
     return jsonData;
   } catch (err) {
     console.error('Error:', err);
-    throw Error;
+    throw err;
   }
 }
-

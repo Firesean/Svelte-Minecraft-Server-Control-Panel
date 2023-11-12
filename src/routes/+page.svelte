@@ -1,8 +1,9 @@
 <script>
   import { onMount } from "svelte";
 
-  let players = [];
-  
+  let onlinePlayers = [];
+  let offlinePlayers = [];
+
   let buttons = [
       { label: "Start", command: "start" },
       { label: "Stop", command: "stop" },
@@ -33,18 +34,27 @@
       if (response.ok) {
           const responseData = await response.json();
           let data = responseData.data;
-          const playersArray = Object.keys(data).map(username => ({
+          console.log(data);
+          if (data.onlinePlayers){
+            console.log("Players Online");
+            onlinePlayers = Object.keys(data.onlinePlayers).map(username => ({
+              username,
+              uuid: data.onlinePlayers[username],
+            }));
+          }
+
+          offlinePlayers = Object.keys(data.offlinePlayers).map(username => ({
             username,
-            uuid: data[username],
+            uuid: data.offlinePlayers[username],
           }));
-          players = playersArray;
       } else {
           console.error("Error fetching data");
       }
   }
   onMount(async () => {
       await retrievePlayers();
-      console.log(players);
+      console.log("Online : ", onlinePlayers);
+      console.log("Offline : ", offlinePlayers);
   });
 </script>
 
@@ -64,7 +74,7 @@
 
 <h1>Online</h1>
 <div class="grid grid-cols-4 gap-4">
-  {#each players as player (player.uuid)}
+  {#each onlinePlayers as player (player.uuid)}
   <a href="/user?name={player.username}&uuid={player.uuid}">
     <h2>{player.username}</h2>
     <img
@@ -77,3 +87,15 @@
 </div>
 
 <h1>Offline</h1>
+<div class="grid grid-cols-4 gap-4">
+  {#each offlinePlayers as player (player.uuid)}
+  <a href="/user?name={player.username}&uuid={player.uuid}">
+    <h2>{player.username}</h2>
+    <img
+      src={`https://mc-heads.net/avatar/${player.uuid}`}
+      alt={player.username}
+      title={player.username}
+    />
+  </a>
+  {/each}
+</div>

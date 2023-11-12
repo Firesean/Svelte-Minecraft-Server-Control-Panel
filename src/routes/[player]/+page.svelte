@@ -17,22 +17,27 @@
         const responseData = await response.json();
         let data = responseData.data;
         data = JSON.parse(data);
+        console.log(data);
 
         // Parse the Inventory data
-        inventory = data.Inventory.map((itemString) => {
-            const idMatch = itemString.match(/id: "(.*?)"/);
-            const countMatch = itemString.match(/Count: (\d+)/);
+        try{
+          inventory = data.inventory.map((itemString) => {
+              const idMatch = itemString.match(/id: "(.*?)"/);
+              const countMatch = itemString.match(/Count: (\d+)/);
 
-            if (idMatch && idMatch[1]) {
-                const id = idMatch[1].replace("minecraft:", "");
-                const count = countMatch ? parseInt(countMatch[1], 10) : 1;
-                return { id, count };
-            }
-            return null;
-        }).filter((item) => item !== null); // Remove any null entries
-
+              if (idMatch && idMatch[1]) {
+                  const id = idMatch[1].replace("minecraft:", "");
+                  const count = countMatch ? parseInt(countMatch[1], 10) : 1;
+                  return { id, count };
+              }
+              return null;
+          }).filter((item) => item !== null); // Remove any null entries
+        } catch(err){
+          console.log(err);
+        }
         // Parse the Enderchest data
-        enderchest = data.Enderchest.map((itemString) => {
+        try {
+        enderchest = data.enderchest.map((itemString) => {
             const idMatch = itemString.match(/id: "(.*?)"/);
             const countMatch = itemString.match(/Count: (\d+)/);
 
@@ -43,7 +48,9 @@
             }
             return null;
         }).filter((item) => item !== null); // Remove any null entries
-
+        } catch(err){
+            console.log(err);
+          }
     } else {
         console.error("Error fetching data");
     }
@@ -55,7 +62,6 @@
         playerName = urlParams.get("name");
         uuid = urlParams.get("uuid");
         await retrieveInventories();
-        console.log(inventory);
     });
   </script>
   
@@ -65,7 +71,7 @@
     <ul class="inventory">
       {#each inventory as item}
       <li>
-        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
+        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
       </li>
       {/each}
     </ul>
@@ -74,7 +80,7 @@
     <ul class="inventory">
       {#each enderchest as item}
       <li>
-        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
+        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
       </li>
       {/each}
     </ul>
