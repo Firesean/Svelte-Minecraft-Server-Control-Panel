@@ -42,15 +42,17 @@ export async function POST({ request }) {
       case "retrievePlayers":
           const players = await getPlayers(rcon);
 
-          const dataArrayToInsert = Object.keys(players).map((username) => ({
+          const dataArrayToInsert = Object.keys(players.onlinePlayers).map((username) => ({
             username,
-            uuid: players[username],
+            uuid: players.onlinePlayers[username],
           }));
-          if (dataArrayToInsert.onlinePlayers){
-            console.log("To insert : ", dataArrayToInsert.onlinePlayers);
+
+          
+          if (dataArrayToInsert){
+            console.log("Players to upsert : ", dataArrayToInsert);
             await supabase
             .from('players')
-            .upsert(dataArrayToInsert.onlinePlayers);
+            .upsert(dataArrayToInsert);
           }
           return json({status: 200, message: "Players retrieved successfully", data: players});
       case "retrieveInventories":
@@ -118,8 +120,6 @@ async function getPlayers(rcon) {
       .from('players')
       .select('username, uuid');
   }
-
-  console.log(response);
 
   // Transform the array into the desired object structure
   if (response.data){
