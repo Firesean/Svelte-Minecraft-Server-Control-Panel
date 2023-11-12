@@ -46,11 +46,12 @@ export async function POST({ request }) {
             username,
             uuid: players[username],
           }));
-          
-          await supabase
-          .from('players')
-          .upsert(dataArrayToInsert);
-        
+          if (dataArrayToInsert.onlinePlayers){
+            console.log("To insert : ", dataArrayToInsert.onlinePlayers);
+            await supabase
+            .from('players')
+            .upsert(dataArrayToInsert.onlinePlayers);
+          }
           return json({status: 200, message: "Players retrieved successfully", data: players});
       case "retrieveInventories":
         const inventories = await getPlayerInventories(rcon, data.player, data.uuid);

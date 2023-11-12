@@ -53,8 +53,6 @@
   }
   onMount(async () => {
       await retrievePlayers();
-      console.log("Online : ", onlinePlayers);
-      console.log("Offline : ", offlinePlayers);
   });
 </script>
 
