@@ -1,14 +1,15 @@
 <script>
   import { onMount } from "svelte";
+  import Player from "../components/player.svelte";
 
   let onlinePlayers = [];
   let offlinePlayers = [];
 
   let buttons = [
-      { label: "Start", command: "start" },
-      { label: "Stop", command: "stop" },
-      { label: "Restart", command: "restart" },
-      { label: "Kill", command: "kill" },
+      // { label: "Start", command: "start" },
+      // { label: "Stop", command: "stop" },
+      // { label: "Restart", command: "restart" },
+      // { label: "Kill", command: "kill" },
       { label : "Get Players", command : "retrievePlayers"},
   ];
 
@@ -25,7 +26,6 @@
   
 
   async function retrievePlayers() {
-      console.log(`Requesting Players Online`);
       const response = await fetch("../api/minecraft-server-controller", {
           method: 'POST',
           body: JSON.stringify({ action: "retrievePlayers" }),
@@ -34,9 +34,7 @@
       if (response.ok) {
           const responseData = await response.json();
           let data = responseData.data;
-          console.log(data);
           if (data.onlinePlayers){
-            console.log("Players Online");
             onlinePlayers = Object.keys(data.onlinePlayers).map(username => ({
               username,
               uuid: data.onlinePlayers[username],
@@ -69,31 +67,20 @@
   </div>
 </div>
 
-
-<h1>Online</h1>
-<div class="grid grid-cols-4 gap-4">
-  {#each onlinePlayers as player (player.uuid)}
-  <a href="/user?name={player.username}&uuid={player.uuid}">
-    <h2>{player.username}</h2>
-    <img
-      src={`https://mc-heads.net/avatar/${player.uuid}`}
-      alt={player.username}
-      title={player.username}
-    />
-  </a>
-  {/each}
+<div class="pt-8 bg-gradient-to-b from-green-700 to-green-300">
+  <h1>Online</h1>
+  <div class="pb-8 grid grid-cols-4 gap-4 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
+    {#each onlinePlayers as player (player.uuid)}
+      <Player {player}/>
+    {/each}
+  </div>
 </div>
 
-<h1>Offline</h1>
-<div class="grid grid-cols-4 gap-4">
-  {#each offlinePlayers as player (player.uuid)}
-  <a href="/user?name={player.username}&uuid={player.uuid}">
-    <h2>{player.username}</h2>
-    <img
-      src={`https://mc-heads.net/avatar/${player.uuid}`}
-      alt={player.username}
-      title={player.username}
-    />
-  </a>
-  {/each}
+<div class="bg-gradient-to-b from-gray-500 to-gray-400 bg-noise pt-8">
+  <h1>Offline</h1>
+  <div class="pb-8 grid grid-cols-4 gap-4">
+    {#each offlinePlayers as player (player.uuid)}
+      <Player {player}/>
+    {/each}
+  </div>
 </div>

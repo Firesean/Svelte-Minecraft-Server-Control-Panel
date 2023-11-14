@@ -4,11 +4,14 @@
 
 * {
     font-family: "minecraft";
-    src: local("../static/fonts/minecraft-font/MinecraftBold-nMK1.woff2") format('woff2');
+}
+
+html {
+    @apply bg-gradient-to-b from-blue-light via-blue-dark to-blue-light;
 }
 
 h1 {
-    @apply font-bold text-6xl border-red-500 border-2 text-center;
+    @apply font-bold text-6xl border-red-500 border-2 text-center mb-4;
 }
 
 h2 {

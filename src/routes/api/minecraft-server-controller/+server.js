@@ -47,6 +47,8 @@ export async function POST({ request }) {
             uuid: players.onlinePlayers[username],
           }));
 
+          console.log("Offline Players Found : ", players.offlinePlayers);
+
           
           if (dataArrayToInsert){
             console.log("Players to upsert : ", dataArrayToInsert);
@@ -109,28 +111,22 @@ async function getPlayers(rcon) {
 
   const onlinePlayerUUIDs = Object.values(playerObject.onlinePlayers);
 
-  if (onlinePlayerUUIDs.length != 0){
-    response = await supabase
-        .from('players')
-        .select('username, uuid')
-        .not('uuid', 'eq', onlinePlayerUUIDs);
-  }
-  else{
-    response = await supabase
-      .from('players')
-      .select('username, uuid');
-  }
-
-  // Transform the array into the desired object structure
-  if (response.data){
-    const transformedPlayers = response.data.reduce((acc, player) => {
-      acc[player.username] = player.uuid;
-      return acc;
-    }, {});
-
-    playerObject.offlinePlayers = transformedPlayers;
-  }
+  response = await supabase
+    .from('players')
+    .select('username, uuid');
+  
+  // Filter out online players
+  const filteredOfflinePlayers = response.data.filter(player => !onlinePlayerUUIDs.includes(player.uuid));
+  
+  // Transform the filtered array into the desired object structure
+  const transformedOfflinePlayers = filteredOfflinePlayers.reduce((acc, player) => {
+    acc[player.username] = player.uuid;
+    return acc;
+  }, {});
+  
+  playerObject.offlinePlayers = transformedOfflinePlayers;
   return playerObject;
+  
 }
 
 async function getPlayerInventories(rcon, player, uuid) {
@@ -164,8 +160,6 @@ async function getPlayerInventories(rcon, player, uuid) {
     }
 
     const jsonData = JSON.stringify(data, null, 2);
-    
-    console.log(jsonData);
 
     if (data.inventory.length > 0 || data.enderchest.length > 0) {
       console.log("Retrieving Inventories from In-game");

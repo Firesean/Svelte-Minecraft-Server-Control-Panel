@@ -7,7 +7,6 @@
     let enderchest = [];
   
     async function retrieveInventories() {
-    console.log(`Requesting Player Inventory - ${playerName}`);
     const response = await fetch("../api/minecraft-server-controller", {
         method: "POST",
         body: JSON.stringify({ action: "retrieveInventories", player: playerName, uuid: uuid }),
@@ -17,7 +16,6 @@
         const responseData = await response.json();
         let data = responseData.data;
         data = JSON.parse(data);
-        console.log(data);
 
         // Parse the Inventory data
         try{
