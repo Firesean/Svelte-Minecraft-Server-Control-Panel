@@ -10,6 +10,11 @@ export default {
         'brown-medium': '#8B4513', // Medium brown
         'brown-dark': '#3E2723', // Dark brown
       },
+      backgroundColor: {
+        'brown-light': '#D2B48C',
+        'brown-medium': '#8B4513',
+        'obsidian': '#3C2E3E',
+      },
 },
   },
   plugins: [],

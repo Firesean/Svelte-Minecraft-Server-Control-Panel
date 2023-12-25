@@ -113,7 +113,8 @@ async function getPlayers(rcon) {
 
   response = await supabase
     .from('players')
-    .select('username, uuid');
+    .select('username, uuid')
+    .order('username', { ascending: true });
   
   // Filter out online players
   const filteredOfflinePlayers = response.data.filter(player => !onlinePlayerUUIDs.includes(player.uuid));

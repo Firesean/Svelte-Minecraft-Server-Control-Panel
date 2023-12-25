@@ -54,30 +54,32 @@
   });
 </script>
 
+<div class="h-full">
+  <div class="mx-auto grid grid-cols-2">
+    <img src="https://panel.pebblehost.com/status/579172" width="468" height="60" alt=""/>
 
-<div class="mx-auto grid grid-cols-2">
-  <img src="https://panel.pebblehost.com/status/579172" width="468" height="60" alt=""/>
-
-  <div class="grid grid-cols-4 gap-2">
-    {#each buttons as button}
-      <button class="p-6 border-2 border-blue-600 rounded-lg bg-slate-400" on:click={() => handleButtonClick(button.command)}>
-        {button.label}
-      </button>
-    {/each}
+    <div class="grid grid-cols-4 gap-2">
+      {#each buttons as button}
+        <button class="border-2 border-blue-600 rounded-lg bg-slate-400" on:click={() => handleButtonClick(button.command)}>
+          {button.label}
+        </button>
+      {/each}
+    </div>
   </div>
-</div>
 
-<div class="pt-8 bg-gradient-to-b from-green-700 to-green-300">
-  <h1>Online</h1>
+
+  <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300 ">
+    <h1>Online</h1>
+  </div>
   <div class="pb-8 grid grid-cols-4 gap-4 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
     {#each onlinePlayers as player (player.uuid)}
       <Player {player}/>
     {/each}
   </div>
-</div>
 
-<div class="bg-gradient-to-b from-gray-500 to-gray-400 bg-noise pt-8">
-  <h1>Offline</h1>
+  <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
+    <h1>Offline</h1>
+  </div>
   <div class="pb-8 grid grid-cols-4 gap-4">
     {#each offlinePlayers as player (player.uuid)}
       <Player {player}/>

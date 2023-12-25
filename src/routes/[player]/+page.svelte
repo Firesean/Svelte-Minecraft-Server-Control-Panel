@@ -63,23 +63,29 @@
     });
   </script>
   
+  <!-- https://minecraft-ids.grahamedgecombe.com/ -->
   <main>
+    
     <img src={`https://mc-heads.net/avatar/${uuid}`} alt={playerName} title={playerName} />
-    <h1>Inventory</h1>
-    <ul class="inventory">
-      {#each inventory as item}
-      <li>
-        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
-      </li>
-      {/each}
-    </ul>
-  
-    <h1>Enderchest</h1>
-    <ul class="inventory">
-      {#each enderchest as item}
-      <li>
-        <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
-      </li>
-      {/each}
-    </ul>
+    <div class="bg-brown-light pb-10">
+      <h1>Inventory</h1>
+      <ul class="inventory">
+        {#each inventory as item}
+        <li>
+          <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
+        </li>
+        {/each}
+      </ul>
+    </div>
+
+    <div class="bg-obsidian pb-10">
+      <h1>Enderchest</h1>
+      <ul class="inventory">
+        {#each enderchest as item}
+        <li>
+          <img src={`https://minecraftitemids.com/item/${item.id}.png`} alt={item.id} title={item.id} class="minecraft-item"><span class="item-count">{item.count}</span>
+        </li>
+        {/each}
+      </ul>
+    </div>
   </main>

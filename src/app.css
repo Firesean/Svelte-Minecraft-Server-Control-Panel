@@ -11,11 +11,11 @@ html {
 }
 
 h1 {
-    @apply font-bold text-6xl border-red-500 border-2 text-center mb-4;
+    @apply font-bold text-6xl text-center mb-4;
 }
 
 h2 {
-    @apply font-bold text-4xl border-red-500 border-2 text-center;
+    @apply font-bold text-4xl text-center;
 }
 
 .minecraft-item{
