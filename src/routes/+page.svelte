@@ -56,11 +56,9 @@
 
 <div class="h-full">
   <div class="mx-auto grid grid-cols-2">
-    <img src="https://panel.pebblehost.com/status/579172" width="468" height="60" alt=""/>
-
     <div class="grid grid-cols-4 gap-2">
       {#each buttons as button}
-        <button class="border-2 border-blue-600 rounded-lg bg-slate-400" on:click={() => handleButtonClick(button.command)}>
+        <button class="border-2 border-slate-400 rounded-lg bg-slate-300 h-[4em] m-2 font-bold text-emerald-600" on:click={() => handleButtonClick(button.command)}>
           {button.label}
         </button>
       {/each}
