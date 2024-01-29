@@ -69,7 +69,7 @@
   <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300 ">
     <h1>Online</h1>
   </div>
-  <div class="pb-8 grid grid-cols-4 gap-4 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
+  <div class="grid grid-cols-4 gap-4 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
     {#each onlinePlayers as player (player.uuid)}
       <Player {player}/>
     {/each}
@@ -78,7 +78,7 @@
   <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
     <h1>Offline</h1>
   </div>
-  <div class="pb-8 grid grid-cols-4 gap-4">
+  <div class="grid grid-cols-4">
     {#each offlinePlayers as player (player.uuid)}
       <Player {player}/>
     {/each}
