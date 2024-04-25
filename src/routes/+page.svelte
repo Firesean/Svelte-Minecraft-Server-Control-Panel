@@ -54,9 +54,9 @@
   });
 </script>
 
-<div class="h-full">
-  <div class="mx-auto grid grid-cols-2">
-    <div class="grid grid-cols-4 gap-2">
+<div class="w-full h-full m-auto">
+  <div class="mx-auto flex">
+    <div class="flex gap-2">
       {#each buttons as button}
         <button class="border-2 border-slate-400 rounded-lg bg-slate-300 h-[4em] m-2 font-bold text-emerald-600" on:click={() => handleButtonClick(button.command)}>
           {button.label}
@@ -65,22 +65,23 @@
     </div>
   </div>
 
+  <div class="mx-auto justify-center items-center">
+    <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
+      <h1>Online</h1>
+    </div>
+    <div class="flex justify-center flex-wrap gap-8 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
+      {#each onlinePlayers as player (player.uuid)}
+        <Player {player}/>
+      {/each}
+    </div>
 
-  <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300 ">
-    <h1>Online</h1>
-  </div>
-  <div class="grid grid-cols-4 gap-4 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
-    {#each onlinePlayers as player (player.uuid)}
-      <Player {player}/>
-    {/each}
-  </div>
-
-  <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
-    <h1>Offline</h1>
-  </div>
-  <div class="grid grid-cols-4">
-    {#each offlinePlayers as player (player.uuid)}
-      <Player {player}/>
-    {/each}
+    <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
+      <h1>Offline</h1>
+    </div>
+    <div class="flex justify-center gap-8 flex-wrap">
+      {#each offlinePlayers as player (player.uuid)}
+        <Player {player}/>
+      {/each}
+    </div>
   </div>
 </div>
