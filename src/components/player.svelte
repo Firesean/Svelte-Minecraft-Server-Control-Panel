@@ -12,7 +12,7 @@
 }
 </style>
 
-<div class="flex flex-shrink justify-center aspect-square md:w-1/3 lg:w-1/5"> <!-- Adjusted width for smaller screens -->
+<div class="flex flex-shrink aspect-square md:w-1/3 lg:w-1/5 scale-[70%]"> <!-- Adjusted width for smaller screens -->
   <a href={`/user?name=${player.username}&uuid=${player.uuid}`} class="mt-2 justify-center text-center">
     <h2 class="username">{player.username}</h2>
     <img

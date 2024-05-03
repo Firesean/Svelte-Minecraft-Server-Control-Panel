@@ -23,8 +23,6 @@
         }
   }
 
-  
-
   async function retrievePlayers() {
       const response = await fetch("../api/minecraft-server-controller", {
           method: 'POST',
@@ -70,18 +68,24 @@
       <h1>Online</h1>
     </div>
     <div class="flex justify-center flex-wrap gap-8 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
-      {#each onlinePlayers as player (player.uuid)}
-        <Player {player}/>
-      {/each}
+    </div>
+    <div class="container mx-auto px-4">
+      <div class="flex flex-wrap justify-start gap-8">
+        {#each onlinePlayers as player (player.uuid)}
+          <Player {player}/>
+        {/each}
+      </div>
     </div>
 
     <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
       <h1>Offline</h1>
     </div>
-    <div class="flex justify-center gap-8 flex-wrap">
-      {#each offlinePlayers as player (player.uuid)}
-        <Player {player}/>
-      {/each}
+    <div class="container mx-auto px-4">
+      <div class="flex flex-wrap justify-start gap-8">
+        {#each offlinePlayers as player (player.uuid)}
+          <Player {player}/>
+        {/each}
+      </div>
     </div>
   </div>
 </div>
