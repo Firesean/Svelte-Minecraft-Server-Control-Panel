@@ -1,9 +1,12 @@
 <script>
   import { onMount } from "svelte";
-  import Player from "../components/player.svelte";
+  import Player from "$lib/components/player.svelte";
+  import PlayersContainer from "$lib/components/players-container.svelte";
+
 
   let onlinePlayers = [];
   let offlinePlayers = [];
+  const maxPlayers = 100;
 
   let buttons = [
       // { label: "Start", command: "start" },
@@ -64,28 +67,17 @@
   </div>
 
   <div class="mx-auto justify-center items-center">
-    <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
-      <h1>Online</h1>
-    </div>
-    <div class="flex justify-center flex-wrap gap-8 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
-    </div>
-    <div class="container mx-auto px-4">
-      <div class="flex flex-wrap justify-start gap-8">
-        {#each onlinePlayers as player (player.uuid)}
-          <Player {player}/>
-        {/each}
+    <div class="h-[10vh]">
+      <div class="h-[30%] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
+      </div>
+      <div class="h-[70%] flex justify-center flex-wrap gap-8 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
+        <h1 class="absolute">Online - {onlinePlayers?.length}/{maxPlayers}</h1>
       </div>
     </div>
-
+    <PlayersContainer players={onlinePlayers}/>
     <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
       <h1>Offline</h1>
     </div>
-    <div class="container mx-auto px-4">
-      <div class="flex flex-wrap justify-start gap-8">
-        {#each offlinePlayers as player (player.uuid)}
-          <Player {player}/>
-        {/each}
-      </div>
-    </div>
+    <PlayersContainer players={offlinePlayers}/>
   </div>
 </div>
