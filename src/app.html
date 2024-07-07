@@ -1,12 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		%sveltekit.head%
-	</head>
-	<body data-sveltekit-preload-data="hover">
-		<div>%sveltekit.body%</div>
-	</body>
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    %sveltekit.head%
+</head>
+<body data-sveltekit-preload-data="hover">
+    <div>%sveltekit.body%</div>
+</body>
+<script src="src/lib/scripts/noise.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const generateNoise = (width, height, baseColor) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = width;
+            canvas.height = height;
+
+            // Fill the canvas with the base color
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(0, 0, width, height);
+
+            // Overlay the noise
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const value = Math.floor(Math.random() * 256);
+                    ctx.fillStyle = `rgba(${value}, ${value}, ${value}, 0.1)`; // Adjust the alpha for desired effect
+                    ctx.fillRect(x, y, 1, 1);
+                }
+            }
+
+            return canvas.toDataURL('image/png');
+        };
+
+        const noiseTexture = generateNoise(500, 500, 'rgba(94, 179, 206, 0.5)'); // Red base color with some transparency
+        document.documentElement.style.backgroundImage = `url(${noiseTexture})`;
+        document.documentElement.style.backgroundSize = 'cover';
+    });
+</script>
 </html>

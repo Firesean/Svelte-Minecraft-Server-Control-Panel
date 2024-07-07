@@ -1,8 +1,7 @@
 <script>
   import { onMount } from "svelte";
-  import Player from "$lib/components/player.svelte";
   import PlayersContainer from "$lib/components/players-container.svelte";
-
+  import NoiseContainer from "$lib/components/noise-container.svelte";
 
   let onlinePlayers = [];
   let offlinePlayers = [];
@@ -66,17 +65,26 @@
     </div>
   </div>
 
-  <div class="mx-auto justify-center items-center">
-    <div class="h-[10vh]">
-      <div class="h-[30%] flex items-center justify-center bg-gradient-to-b from-green-700 to-green-300">
+  <div class="mx-auto flex flex-col justify-center items-center">
+    <div class="h-[10vh] w-full">
+      <div class="h-[30%] flex items-center justify-center">
+        <NoiseContainer bg="#71A92C" noise={2000} size=200/>
       </div>
-      <div class="h-[70%] flex justify-center flex-wrap gap-8 bg-gradient-to-b from-brown-light via-brown-medium to-brown-dark">
-        <h1 class="absolute">Online - {onlinePlayers?.length}/{maxPlayers}</h1>
+
+      
+      <div class="h-[70%] flex justify-center flex-wrap gap-8">
+        <NoiseContainer bg="#653818" noise={2000} size=200> 
+          <h1 class="text-white">Online {onlinePlayers?.length}/{maxPlayers}</h1>
+        </NoiseContainer>
       </div>
     </div>
+
     <PlayersContainer players={onlinePlayers}/>
-    <div class="h-[10vh] flex items-center justify-center bg-gradient-to-b from-gray-600 to-gray-300">
-      <h1>Offline</h1>
+    <div class="h-[10vh] w-full flex items-center justify-center text-white">
+      <NoiseContainer bg="#4b5563" noise={2000} size=200>
+        <h1>Offline</h1>
+      </NoiseContainer>
+
     </div>
     <PlayersContainer players={offlinePlayers}/>
   </div>

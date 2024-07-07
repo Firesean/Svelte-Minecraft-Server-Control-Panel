@@ -16,10 +16,6 @@
     font-style: normal;
 }
 
-html {
-    @apply bg-gradient-to-b from-blue-light via-blue-dark to-blue-light;
-}
-
 h1 {
     @apply font-bold text-6xl text-center mb-4;
 }
