@@ -6,7 +6,7 @@
   <a href={`/${player.username}`} class="justify-center text-center flex flex-col w-full py-2 gap-2">
     <h2 class="username">{player.username}</h2>
     <img
-      src={`https://mc-heads.net/avatar/${player.uuid}`}
+      src={`https://mc-heads.net/avatar/${player.username}`}
       alt={player.username}
       title={player.username}
       class="m-auto object-cover squared-image shadow-lg"
