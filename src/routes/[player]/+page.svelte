@@ -25,7 +25,7 @@
 </script>
   
 <!-- https://minecraft-ids.grahamedgecombe.com/ -->
-<main class="w-[950px] mx-auto">
+<main class="w-[950px] mx-auto select-none">
   <div class="w-full flex flex-row justify-start p-8 gap-2">
     <div class="flex flex-wrap mx-auto inventory">
       <div class="flex flex-col gap-2">

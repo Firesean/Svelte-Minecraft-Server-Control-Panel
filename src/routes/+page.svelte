@@ -54,7 +54,7 @@
   });
 </script>
 
-<div class="w-full h-full mx-auto max-w-[1600px] ">
+<div class="w-full h-full mx-auto max-w-[1600px] select-none">
   <div class="mx-auto flex">
     <div class="flex gap-2 p-4 w-full">
       {#each buttons as button}
