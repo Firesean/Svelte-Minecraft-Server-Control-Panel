@@ -10,12 +10,12 @@
   let enderchest = [];
 
   onMount(async () => {
-    // const inventoriesResponse = await fetch(`./api/minecraft-server-controller`, {
-    //     method: "POST",
-    //     body: JSON.stringify({ action: "retrieveInventories", player: $page.data.player.username, uuid: $page.data.player.id }),
-    // });
+    const inventoriesResponse = await fetch(`./api/minecraft-server-controller`, {
+        method: "POST",
+        body: JSON.stringify({ action: "retrieveInventories", player: $page.data.player.username, uuid: $page.data.player.id }),
+    });
 
-    // console.log("Response : ", await inventoriesResponse.json());
+    console.log("Response : ", await inventoriesResponse.json());
 
     inventory = $page.data.inventory || [];
     enderchest = $page.data.enderchest || [];

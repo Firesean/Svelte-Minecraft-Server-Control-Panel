@@ -7,8 +7,10 @@ export async function load({ params, url }){
     const {player} = params;
 
     const playerInfoResponse = await fetch(`https://playerdb.co/api/player/minecraft/${player}`, {
-        method: "POST",
+        method: "GET",
+        headers: { "User-Agent": "Mozilla/5.0" }
     });
+    
     const {success, data} = await playerInfoResponse.json();
     if(!success){
         throw redirect(307, url.origin);
