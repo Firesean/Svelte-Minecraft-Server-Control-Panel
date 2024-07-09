@@ -44,8 +44,6 @@
 		"mysql": "^2.18.1",
 		"mysql2": "^3.6.2",
 		"rcon-client": "^4.2.3",
-		"sequelize": "^6.37.3",
-		"sqlite3": "^5.1.7",
 		"supabase": "^1.110.1",
 		"svelte-routing": "^2.5.0"
 	}
