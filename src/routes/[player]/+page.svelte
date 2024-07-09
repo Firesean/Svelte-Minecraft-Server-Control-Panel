@@ -10,7 +10,7 @@
   let enderchest = [];
 
   onMount(async () => {
-    const inventoriesResponse = await fetch(`./api/minecraft-server-controller`, {
+    const inventoriesResponse = await fetch(`/api/minecraft-server-controller`, {
         method: "POST",
         body: JSON.stringify({ action: "retrieveInventories", player: $page.data.player.username, uuid: $page.data.player.id }),
     });

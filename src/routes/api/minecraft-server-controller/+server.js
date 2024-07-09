@@ -2,8 +2,17 @@ import { Rcon } from 'rcon-client';
 import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { RCON_HOST, RCON_PORT, RCON_PASSWORD, SUPABASE_KEY, SUPABASE_URL } from '$env/static/private';
+import { Sequelize, DataTypes } from "sequelize";
+const sequelize = new Sequelize('sqlite::memory:');
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const RconStatus = sequelize.define('RconStatus', {
+  isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+  },
+});
 
 const rconOptions = {
   host: RCON_HOST,
@@ -25,26 +34,57 @@ const commands = {
   playerEnderchest: (player) => `data get entity ${player} EnderItems`,
 };
 
+async function initializeDatabase() {
+  await sequelize.sync({ force: true });
+  await RconStatus.create({ isActive: false }); // Initialize the flag
+}
+
+async function checkAndSetRconFlag() {
+  const status = await RconStatus.findOne();
+
+  if (status.isActive) {
+      return false; // RCON connection is already in use
+  } else {
+      await status.update({ isActive: true });
+      return true; // Successfully set the flag
+  }
+}
+
+async function releaseRconFlag() {
+  const status = await RconStatus.findOne();
+  await status.update({ isActive: false });
+}
+
 export async function POST({ request }) {
+  await initializeDatabase(); // Initialize the database if needed
+
   const data = await request.json();
+
+  const canActivateRcon = await checkAndSetRconFlag();
+
+  if (!canActivateRcon) {
+      return json({ status: 429, message: "Too Many Requests", error: "RCON connection is already in use" });
+  }
+
   try {
-    await rcon.connect();
+      await rcon.connect();
 
-    switch (data.action) {
-      case "retrievePlayers":
-        return await handleRetrievePlayers();
+      switch (data.action) {
+          case "retrievePlayers":
+              return await handleRetrievePlayers();
 
-      case "retrieveInventories":
-        return await handleRetrieveInventories(data.player, data.uuid);
+          case "retrieveInventories":
+              return await handleRetrieveInventories(data.player, data.uuid);
 
-      default:
-        return json({ status: 400, message: "Bad Request", error: "Unsupported action" });
-    }
+          default:
+              return json({ status: 400, message: "Bad Request", error: "Unsupported action" });
+      }
   } catch (err) {
-    console.error('RCON Error:', err);
-    return json({ status: 500, message: "Internal Server Error", error: "An error occurred while processing the request" });
+      console.error('RCON Error:', err);
+      return json({ status: 500, message: "Internal Server Error", error: "An error occurred while processing the request" });
   } finally {
-    rcon.end();
+      await releaseRconFlag();
+      rcon.end();
   }
 }
 
