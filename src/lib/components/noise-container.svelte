@@ -1,4 +1,3 @@
-<!-- NoiseContainer.svelte -->
 <script>
     import { onMount } from 'svelte';
     import { generateNoise } from '$lib/scripts/noise.js';

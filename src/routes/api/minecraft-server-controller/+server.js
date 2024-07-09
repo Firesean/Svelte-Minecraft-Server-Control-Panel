@@ -29,9 +29,7 @@ const commands = {
 
 export async function POST({ request }) {
   const data = await request.json();
-
   await rcon.connect();
-
   try {
     switch (data.action) {
       case "retrievePlayers":
@@ -116,6 +114,7 @@ async function getPlayerInventories(rcon, player, uuid) {
       const item = response.match(regexPattern);
       if (item) {
         data.inventory.push(item[1].trim());
+        console.log(`Index ${data.inventory.length - 1} : `, data.inventory.at(data.inventory.length - 1));
       }
     });
 
@@ -123,6 +122,8 @@ async function getPlayerInventories(rcon, player, uuid) {
       const item = response.match(regexPattern);
       if (item) {
         data.enderchest.push(item[1].trim());
+        console.log(`Index ${data.enderchest.length - 1} : `, data.enderchest.at(data.enderchest.length - 1));
+
       }
     });
 

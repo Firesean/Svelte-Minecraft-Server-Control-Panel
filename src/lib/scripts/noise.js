@@ -14,4 +14,3 @@ export function generateNoise(width, height, intensity=255) {
     ctx.putImageData(imageData, 0, 0);
     return canvas.toDataURL();
 }
-  

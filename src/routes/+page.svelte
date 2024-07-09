@@ -54,12 +54,14 @@
   });
 </script>
 
-<div class="w-full h-full m-auto">
+<div class="w-full h-full mx-auto max-w-[1600px] ">
   <div class="mx-auto flex">
-    <div class="flex gap-2">
+    <div class="flex gap-2 p-4 w-full">
       {#each buttons as button}
-        <button class="border-2 border-slate-400 rounded-lg bg-slate-300 h-[4em] m-2 font-bold text-emerald-600" on:click={() => handleButtonClick(button.command)}>
-          {button.label}
+        <button class="text-white w-[200px] h-[40px] border-black border-[3px]" style="text-shadow: #000 2px 2px 2px;" on:click={() => handleButtonClick(button.command)}>
+          <NoiseContainer bg="#A5A5A5" noise={500}>
+            {button.label}
+          </NoiseContainer>
         </button>
       {/each}
     </div>
