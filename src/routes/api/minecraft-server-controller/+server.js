@@ -3,18 +3,16 @@ import { json } from '@sveltejs/kit';
 import { createClient } from '@supabase/supabase-js';
 import { RCON_HOST, RCON_PORT, RCON_PASSWORD, SUPABASE_KEY, SUPABASE_URL } from '$env/static/private';
 
-const supabaseUrl = SUPABASE_URL;
-const supabaseKey = SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const options = {
+const rconOptions = {
   host: RCON_HOST,
   port: RCON_PORT,
   password: RCON_PASSWORD,
   timeout: 30000,
 };
 
-const rcon = new Rcon(options);
+const rcon = new Rcon(rconOptions);
 
 const commands = {
   list: "list uuids",
@@ -29,38 +27,47 @@ const commands = {
 
 export async function POST({ request }) {
   const data = await request.json();
-  await rcon.connect();
   try {
+    await rcon.connect();
+
     switch (data.action) {
       case "retrievePlayers":
-        const players = await getPlayers(rcon);
-        const dataArrayToInsert = Object.keys(players.onlinePlayers).map((username) => ({
-          username,
-          uuid: players.onlinePlayers[username],
-        }));
-
-        if (dataArrayToInsert.length > 0) {
-          await supabase.from('players').upsert(dataArrayToInsert);
-        }
-        return json({ status: 200, message: "Players retrieved successfully", data: players });
+        return await handleRetrievePlayers();
 
       case "retrieveInventories":
-        const inventories = await getPlayerInventories(rcon, data.player, data.uuid);
-        return json({ status: 200, message: `Inventories for ${data.player} retrieved successfully`, data: inventories });
+        return await handleRetrieveInventories(data.player, data.uuid);
 
       default:
         return json({ status: 400, message: "Bad Request", error: "Unsupported action" });
     }
   } catch (err) {
     console.error('RCON Error:', err);
-    return json({ status: 500, message: "Internal Server Error", error: "An error occurred while retrieving players" });
+    return json({ status: 500, message: "Internal Server Error", error: "An error occurred while processing the request" });
   } finally {
-    rcon.socket.end();
+    rcon.end();
   }
 }
 
+async function handleRetrievePlayers() {
+  const players = await getPlayers(rcon);
+  const dataArrayToInsert = Object.keys(players.onlinePlayers).map((username) => ({
+    username,
+    uuid: players.onlinePlayers[username],
+  }));
+
+  if (dataArrayToInsert.length > 0) {
+    await supabase.from('players').upsert(dataArrayToInsert);
+  }
+  return json({ status: 200, message: "Players retrieved successfully", data: players });
+}
+
+async function handleRetrieveInventories(player, uuid) {
+  const inventories = await getPlayerInventories(rcon, player, uuid);
+  return json({ status: 200, message: `Inventories for ${player} retrieved successfully`, data: inventories });
+}
+
 async function getPlayers(rcon) {
-  let response = await rcon.send(commands.list);
+  const response = await rcon.send(commands.list);
   const regex = /There are (\d+) of a max of (\d+) players online: (.+)$/;
   const match = response.match(regex);
   const playerObject = { onlinePlayers: {}, offlinePlayers: {} };
@@ -78,10 +85,9 @@ async function getPlayers(rcon) {
   }
 
   const onlinePlayerUUIDs = Object.values(playerObject.onlinePlayers);
+  const { data: dbPlayers } = await supabase.from('players').select('username, uuid').order('username', { ascending: true });
 
-  response = await supabase.from('players').select('username, uuid').order('username', { ascending: true });
-  const filteredOfflinePlayers = response.data.filter(player => !onlinePlayerUUIDs.includes(player.uuid));
-
+  const filteredOfflinePlayers = dbPlayers.filter(player => !onlinePlayerUUIDs.includes(player.uuid));
   playerObject.offlinePlayers = filteredOfflinePlayers.reduce((acc, player) => {
     acc[player.username] = player.uuid;
     return acc;
@@ -91,52 +97,49 @@ async function getPlayers(rcon) {
 }
 
 async function getPlayerInventories(rcon, player, uuid) {
-  const regexPattern = /has the following entity data: (.*)/;
-  let data = { enderchest: [], inventory: [] };
+  const data = { enderchest: [], inventory: [] };
 
   try {
-    const inventoryPromises = [];
-    for (let i = 0; i < 41; i++) {
-      inventoryPromises.push(rcon.send(commands.playerInventory(player) + "[" + i.toString() + "]"));
-    }
-
-    const enderchestPromises = [];
-    for (let i = 0; i < 27; i++) {
-      enderchestPromises.push(rcon.send(commands.playerEnderchest(player) + "[" + i.toString() + "]"));
-    }
-
-    const [inventoryResponses, enderchestResponses] = await Promise.all([
-      Promise.all(inventoryPromises),
-      Promise.all(enderchestPromises)
+    const [inventory, enderchest] = await Promise.all([
+      getPlayerInventory(rcon, player),
+      getPlayerEnderchest(rcon, player)
     ]);
 
-    inventoryResponses.forEach(response => {
-      const item = response.match(regexPattern);
-      if (item) {
-        data.inventory.push(item[1].trim());
-        console.log(`Index ${data.inventory.length - 1} : `, data.inventory.at(data.inventory.length - 1));
-      }
-    });
-
-    enderchestResponses.forEach(response => {
-      const item = response.match(regexPattern);
-      if (item) {
-        data.enderchest.push(item[1].trim());
-        console.log(`Index ${data.enderchest.length - 1} : `, data.enderchest.at(data.enderchest.length - 1));
-
-      }
-    });
+    data.inventory = inventory;
+    data.enderchest = enderchest;
 
     if (data.inventory.length > 0 || data.enderchest.length > 0) {
       await supabase.from("inventories").upsert([{ player_uuid: uuid, inventory: data.inventory, enderchest: data.enderchest }]);
     } else {
-      const dbResponse = await supabase.from("inventories").select("enderchest, inventory").eq("player_uuid", uuid);
-      return JSON.stringify(dbResponse.data[0], null, 2);
+      const { data: dbData } = await supabase.from("inventories").select("enderchest, inventory").eq("player_uuid", uuid);
+      return dbData[0];
     }
 
-    return JSON.stringify(data, null, 2);
+    return data;
   } catch (err) {
     console.error('Error:', err);
     throw err;
   }
+}
+
+async function getPlayerInventory(rcon, player) {
+  const regexPattern = /has the following entity data: (.*)/;
+  const inventoryPromises = Array.from({ length: 41 }, (_, i) => rcon.send(commands.playerInventory(player) + `[${i}]`));
+
+  const inventoryResponses = await Promise.all(inventoryPromises);
+  return inventoryResponses.map(response => {
+    const item = response.match(regexPattern);
+    return item ? item[1].trim() : null;
+  }).filter(item => item);
+}
+
+async function getPlayerEnderchest(rcon, player) {
+  const regexPattern = /has the following entity data: (.*)/;
+  const enderchestPromises = Array.from({ length: 27 }, (_, i) => rcon.send(commands.playerEnderchest(player) + `[${i}]`));
+
+  const enderchestResponses = await Promise.all(enderchestPromises);
+  return enderchestResponses.map(response => {
+    const item = response.match(regexPattern);
+    return item ? item[1].trim() : null;
+  }).filter(item => item);
 }

@@ -26,13 +26,19 @@
   
 <!-- https://minecraft-ids.grahamedgecombe.com/ -->
 <main class="w-[950px] mx-auto select-none">
+  <div class="absolute left-0 top-10 z-20 flex flex-col justify-center gap-8 w-full" style="text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff,
+               1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;">
+    <h1>Data is inside of the client side console</h1>
+    <h2>Hold CMD/CTRL + SHIFT + I and Click Console</h2>
+    <h2>Parsing is fun!</h2>
+  </div>
   <div class="w-full flex flex-row justify-start p-8 gap-2">
     <div class="flex flex-wrap mx-auto inventory">
       <div class="flex flex-col gap-2">
-        <ItemContainer item="bow"/>
-        <ItemContainer item="bow"/>
-        <ItemContainer item="bow"/>
-        <ItemContainer item="bow" count="10"/>
+        <ItemContainer/>
+        <ItemContainer/>
+        <ItemContainer/>
+        <ItemContainer/>
       </div>
       {#key uuid}
         <div class="select-none">
@@ -43,7 +49,7 @@
       {/key}
 
       <div class="flex flex-col gap-2 h-full">
-          <ItemContainer item="bow"/>
+          <ItemContainer/>
       </div>
     </div>
   </div>
