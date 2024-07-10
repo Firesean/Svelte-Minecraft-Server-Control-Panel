@@ -97,24 +97,56 @@ async function getPlayers(rcon) {
 }
 
 async function getPlayerInventories(rcon, player, uuid) {
-  const data = { enderchest: [], inventory: [] };
+  const data = { enderchest: [], inventory: [], hotbar: [], equipped: [] };
 
   try {
     const [inventory, enderchest] = await Promise.all([
       getPlayerInventory(rcon, player),
-      getPlayerEnderchest(rcon, player)
+      getPlayerEnderchest(rcon, player),
     ]);
 
     data.inventory = inventory;
     data.enderchest = enderchest;
 
+    console.log(data.inventory);
+    console.log(data.enderchest);
+
+    // Extract hotbar slots (0b to 9b)
+    data.hotbar = inventory.filter(item => {
+      const slotNumber = parseInt(item.Slot);
+      return slotNumber >= 0 && slotNumber <= 8;
+    });
+
+    // Remove hotbar slots from inventory
+    data.inventory = data.inventory.filter(item => {
+      const slotNumber = parseInt(item.Slot);
+      return slotNumber < 0 || slotNumber > 8;
+    });
+
+    // Extract equipped slots (100b to 103b)
+    data.equipped = inventory.filter(item => {
+      const slotNumber = parseInt(item.Slot);
+      return (slotNumber >= 100 && slotNumber <= 103) || item.Slot === null;
+    });
+
+    // Remove equipped slots from inventory
+    data.inventory = data.inventory.filter(item => {
+      const slotNumber = parseInt(item.Slot);
+      return slotNumber < 100 || slotNumber > 103;
+    });
+
     if (data.inventory.length > 0 || data.enderchest.length > 0) {
-      await supabase.from("inventories").upsert([{ player_uuid: uuid, inventory: data.inventory, enderchest: data.enderchest }]);
+      await supabase.from("inventories").upsert([{ 
+        player_uuid: uuid, 
+        inventory: data.inventory, 
+        enderchest: data.enderchest,
+        hotbar: data.hotbar,
+        equipped: data.equipped
+      }]);
     } else {
-      const { data: dbData } = await supabase.from("inventories").select("enderchest, inventory").eq("player_uuid", uuid);
+      const { data: dbData } = await supabase.from("inventories").select("enderchest, inventory, hotbar, equipped").eq("player_uuid", uuid);
       return dbData[0];
     }
-
     return data;
   } catch (err) {
     console.error('Error:', err);
@@ -129,7 +161,16 @@ async function getPlayerInventory(rcon, player) {
   const inventoryResponses = await Promise.all(inventoryPromises);
   return inventoryResponses.map(response => {
     const item = response.match(regexPattern);
-    return item ? item[1].trim() : null;
+    if (item) {
+      const itemData = item[1].trim();
+      try {
+        return extractValues(itemData);
+      } catch (err) {
+        console.error('Error parsing inventory item data:', err, itemData);
+        return {};
+      }
+    }
+    return {};
   }).filter(item => item);
 }
 
@@ -140,6 +181,50 @@ async function getPlayerEnderchest(rcon, player) {
   const enderchestResponses = await Promise.all(enderchestPromises);
   return enderchestResponses.map(response => {
     const item = response.match(regexPattern);
-    return item ? item[1].trim() : null;
+    if (item) {
+      const itemData = item[1].trim();
+      try {
+        return extractValues(itemData);
+      } catch (err) {
+        console.error('Error parsing enderchest item data:', err, itemData);
+        return {};
+      }
+    }
+    return {};
   }).filter(item => item);
+}
+
+
+function extractValues(data) {
+  const extractValue = (regex, text) => {
+      const match = regex.exec(text);
+      if (!match) return null;
+      let value = match[1].trim();
+      if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.substring(1, value.length - 1).replace(/\\"/g, '"');
+      }
+      return value;
+  };
+
+  const countRegex = /count:\s*([0-9]+)/i;
+  const slotRegex = /Slot:\s*([\w]+)/i;
+  const componentsRegex = /components:\s*({.*?)\s*6}]/is;
+  const minecraftCustomNameRegex = /"minecraft:custom_name"\s*:\s*[^"]*"([^"]*)"/is;
+  const idRegex = /id:\s*"([^"]+)"\s*}$/i;
+
+  let count = extractValue(countRegex, data);
+  let slot = extractValue(slotRegex, data);
+  let components = extractValue(componentsRegex, data);
+  let minecraftCustomName = extractValue(minecraftCustomNameRegex, data);
+  let id = extractValue(idRegex, data).replace("minecraft:", "");
+  // if (components){
+  //   console.log(`${id} : ` ,components);
+  // }
+  return {
+      count,
+      Slot: slot,
+      components: components || "",
+      minecraftCustomName: minecraftCustomName || "",
+      id,
+  };
 }

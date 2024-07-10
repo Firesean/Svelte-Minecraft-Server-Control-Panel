@@ -6,22 +6,27 @@
 
   let playerName;
   let uuid;
-  let inventory = [];
-  let enderchest = [];
+  let inventory = Array.from({ length: 27 }, () => ({}));
+  let enderchest = Array.from({ length: 27 }, () => ({}));
+  let hotbar = Array.from({ length: 9 }, () => ({}));
+  let equipped = Array.from({ length: 4 }, () => ({}));
 
   onMount(async () => {
-    const inventoriesResponse = await fetch(`./api/minecraft-server-controller`, {
-        method: "POST",
-        body: JSON.stringify({ action: "retrieveInventories", player: $page.data.player.username, uuid: $page.data.player.id }),
+    const inventoriesResponse = await fetch(`/api/minecraft-server-controller`, {
+      method: "POST",
+      body: JSON.stringify({ action: "retrieveInventories", player: $page.data.player.username, uuid: $page.data.player.id }),
     });
 
-    console.log("Response : ", await inventoriesResponse.json());
-
-    inventory = $page.data.inventory || [];
-    enderchest = $page.data.enderchest || [];
+    const data = await inventoriesResponse.json();
+    console.log(data.data);
+    enderchest = data.data.enderchest;
+    equipped = data.data.equipped;
+    hotbar = data.data.hotbar;
+    inventory = data.data.inventory;
     playerName = $page.data.player.username;
     uuid = $page.data.player.id;
   });
+
 </script>
   
 <!-- https://minecraft-ids.grahamedgecombe.com/ -->
@@ -35,10 +40,9 @@
   <div class="w-full flex flex-row justify-start p-8 gap-2">
     <div class="flex flex-wrap mx-auto inventory">
       <div class="flex flex-col gap-2">
-        <ItemContainer/>
-        <ItemContainer/>
-        <ItemContainer/>
-        <ItemContainer/>
+        {#each equipped as item}
+          <ItemContainer item={item?.id} count={item?.count}/>
+        {/each}
       </div>
       {#key uuid}
         <div class="select-none">
@@ -57,31 +61,21 @@
   <NoiseContainer bg="#E8AC41" noise={100} size=200> 
     <h1 class="text-white">Inventory</h1>
   </NoiseContainer>
-  <div class="inventory grid grid-cols-9">
-    {#each inventory as item}
-      <ItemContainer item={item.id} count={item.count}/>
-    {/each}
-
-    {#each Array(27) as __}
-      <ItemContainer />
-    {/each}
-    <div class="h-[20px] col-span-9"/>
-    {#each Array(9) as __, i}
-      <ItemContainer />
-    {/each}
-  </div>
-
+    <div class="inventory grid grid-cols-9">
+      {#each inventory as item}
+        <ItemContainer item={item?.id} count={item?.count}/>
+      {/each}
+      <div class="h-[20px] col-span-9 w-full"/>
+      {#each hotbar as item}
+        <ItemContainer item={item?.id} count={item?.count}/>
+      {/each}
+    </div>
   <NoiseContainer bg="#3C2E3E" noise={1000} size=200> 
     <h1 class="text-white">Enderchest</h1>
   </NoiseContainer>
-  <div class="inventory grid grid-cols-9">
+  <div class="inventory grid grid-cols-9 w-full">
     {#each enderchest as item}
-      <ItemContainer item={item.id} count={item.count}/>
+      <ItemContainer item={item?.id} count={item?.count}/>
     {/each}
-
-    {#each Array(27) as __}
-      <ItemContainer />
-    {/each}
-
   </div>
 </main>
