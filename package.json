@@ -45,6 +45,7 @@
 		"mysql2": "^3.6.2",
 		"rcon-client": "^4.2.3",
 		"supabase": "^1.110.1",
-		"svelte-routing": "^2.5.0"
+		"svelte-routing": "^2.5.0",
+		"three": "^0.166.1"
 	}
 }

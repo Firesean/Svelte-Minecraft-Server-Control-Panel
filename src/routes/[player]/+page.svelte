@@ -1,8 +1,10 @@
 <script>
   import { onMount } from "svelte";
+  import { page } from '$app/stores';
+
   import NoiseContainer from "$lib/components/noise-container.svelte";
   import ItemContainer from "$lib/components/item-container.svelte";
-  import { page } from '$app/stores';
+  import PlayerModel from "$lib/components/player-model.svelte";
 
   let playerName;
   let uuid;
@@ -10,6 +12,7 @@
   let enderchest = Array.from({ length: 27 }, () => ({}));
   let hotbar = Array.from({ length: 9 }, () => ({}));
   let equipped = Array.from({ length: 4 }, () => ({}));
+  let offhand = Array.from({ length: 1 }, () => ({}));
 
   onMount(async () => {
     const inventoriesResponse = await fetch(`/api/minecraft-server-controller`, {
@@ -22,38 +25,34 @@
     enderchest = data.data.enderchest;
     equipped = data.data.equipped;
     hotbar = data.data.hotbar;
+    offhand = data.data.offhand;
     inventory = data.data.inventory;
     playerName = $page.data.player.username;
     uuid = $page.data.player.id;
   });
-
 </script>
   
 <!-- https://minecraft-ids.grahamedgecombe.com/ -->
+
 <main class="w-[950px] mx-auto select-none">
-  <div class="absolute left-0 top-10 z-20 flex flex-col justify-center gap-8 w-full" style="text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff, 0 -2px #fff,
-               1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;">
-    <h1>Data is inside of the client side console</h1>
-    <h2>Hold CMD/CTRL + SHIFT + I and Click Console</h2>
-    <h2>Parsing is fun!</h2>
-  </div>
   <div class="w-full flex flex-row justify-start p-8 gap-2">
     <div class="flex flex-wrap mx-auto inventory">
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-col-reverse gap-2">
         {#each equipped as item}
           <ItemContainer item={item?.id} count={item?.count}/>
         {/each}
       </div>
       {#key uuid}
-        <div class="select-none">
+        <div class="select-none w-[15em] h-full">
           <NoiseContainer bg="#F0F0F0" noise={0}>
-            <img src={`https://mc-heads.net/body/${uuid}`} alt={playerName} title={playerName} class="px-8 bg-black h-full object-contain min-w-[200px]"/>
+            <!-- <PlayerModel bind:uuid/> -->
+            <img id="followImage" src={`https://mc-heads.net/body/${uuid}`} alt={playerName} title={playerName} class="px-8 bg-black h-full object-contain min-w-[200px]"/>
           </NoiseContainer>
         </div>
       {/key}
 
       <div class="flex flex-col gap-2 h-full">
-          <ItemContainer/>
+          <ItemContainer item={offhand[0]?.id} count={offhand[0]?.count}/>
       </div>
     </div>
   </div>

@@ -61,11 +61,6 @@ async function handleRetrievePlayers() {
   return json({ status: 200, message: "Players retrieved successfully", data: players });
 }
 
-async function handleRetrieveInventories(player, uuid) {
-  const inventories = await getPlayerInventories(rcon, player, uuid);
-  return json({ status: 200, message: `Inventories for ${player} retrieved successfully`, data: inventories });
-}
-
 async function getPlayers(rcon) {
   const response = await rcon.send(commands.list);
   const regex = /There are (\d+) of a max of (\d+) players online: (.+)$/;
@@ -96,6 +91,12 @@ async function getPlayers(rcon) {
   return playerObject;
 }
 
+
+async function handleRetrieveInventories(player, uuid) {
+  const inventories = await getPlayerInventories(rcon, player, uuid);
+  return json({ status: 200, message: `Inventories for ${player} retrieved successfully`, data: inventories });
+}
+
 async function getPlayerInventories(rcon, player, uuid) {
   const data = { enderchest: [], inventory: [], hotbar: [], equipped: [] };
 
@@ -108,32 +109,10 @@ async function getPlayerInventories(rcon, player, uuid) {
     data.inventory = inventory;
     data.enderchest = enderchest;
 
-    console.log(data.inventory);
-    console.log(data.enderchest);
-
-    // Extract hotbar slots (0b to 9b)
-    data.hotbar = inventory.filter(item => {
-      const slotNumber = parseInt(item.Slot);
-      return slotNumber >= 0 && slotNumber <= 8;
-    });
-
-    // Remove hotbar slots from inventory
-    data.inventory = data.inventory.filter(item => {
-      const slotNumber = parseInt(item.Slot);
-      return slotNumber < 0 || slotNumber > 8;
-    });
-
-    // Extract equipped slots (100b to 103b)
-    data.equipped = inventory.filter(item => {
-      const slotNumber = parseInt(item.Slot);
-      return (slotNumber >= 100 && slotNumber <= 103) || item.Slot === null;
-    });
-
-    // Remove equipped slots from inventory
-    data.inventory = data.inventory.filter(item => {
-      const slotNumber = parseInt(item.Slot);
-      return slotNumber < 100 || slotNumber > 103;
-    });
+    data.hotbar = inventory.filter(item => parseInt(item?.Slot) >= 0 && parseInt(item?.Slot) <= 8);
+    data.equipped = inventory.filter(item => parseInt(item?.Slot) >= 100 && parseInt(item?.Slot) <= 103);
+    data.offhand = inventory.filter(item => item.Slot === null);
+    data.inventory = inventory.filter(item => parseInt(item?.Slot) >= 8 && parseInt(item?.Slot) <= 41);
 
     if (data.inventory.length > 0 || data.enderchest.length > 0) {
       await supabase.from("inventories").upsert([{ 
@@ -141,10 +120,11 @@ async function getPlayerInventories(rcon, player, uuid) {
         inventory: data.inventory, 
         enderchest: data.enderchest,
         hotbar: data.hotbar,
-        equipped: data.equipped
+        equipped: data.equipped,
+        offhand: data.offhand,
       }]);
     } else {
-      const { data: dbData } = await supabase.from("inventories").select("enderchest, inventory, hotbar, equipped").eq("player_uuid", uuid);
+      const { data: dbData } = await supabase.from("inventories").select("inventory").eq("player_uuid", uuid);
       return dbData[0];
     }
     return data;
