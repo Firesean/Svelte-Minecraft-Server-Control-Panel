@@ -93,7 +93,19 @@ async function getPlayers(rcon) {
 
 
 async function handleRetrieveInventories(player, uuid) {
-  const inventories = await getPlayerInventories(rcon, player, uuid);
+  const playerObject  = await getPlayers(rcon);
+  let inventories;
+  
+  if (playerObject.onlinePlayers[player] === uuid){
+    inventories = await getPlayerInventories(rcon, player, uuid);
+  }
+  else {
+    inventories = await supabase.from("inventories").select("inventory, enderchest, hotbar, equipped, offhand").eq("player_uuid", uuid);
+    inventories = inventories.data[0];
+    console.log(inventories);
+  }
+  
+  
   return json({ status: 200, message: `Inventories for ${player} retrieved successfully`, data: inventories });
 }
 
@@ -123,10 +135,8 @@ async function getPlayerInventories(rcon, player, uuid) {
         equipped: data.equipped,
         offhand: data.offhand,
       }]);
-    } else {
-      const { data: dbData } = await supabase.from("inventories").select("inventory").eq("player_uuid", uuid);
-      return dbData[0];
     }
+
     return data;
   } catch (err) {
     console.error('Error:', err);
