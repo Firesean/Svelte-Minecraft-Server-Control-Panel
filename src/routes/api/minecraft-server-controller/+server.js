@@ -187,13 +187,13 @@ async function getPlayerEnderchest(rcon, player) {
 
 function extractValues(data) {
   const extractValue = (regex, text) => {
-      const match = regex.exec(text);
-      if (!match) return null;
-      let value = match[1].trim();
-      if (value.startsWith('"') && value.endsWith('"')) {
-          value = value.substring(1, value.length - 1).replace(/\\"/g, '"');
-      }
-      return value;
+    const match = regex.exec(text);
+    if (!match) return null;
+    let value = match[1].trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.substring(1, value.length - 1).replace(/\\"/g, '"');
+    }
+    return value;
   };
 
   const countRegex = /count:\s*([0-9]+)/i;
@@ -201,20 +201,18 @@ function extractValues(data) {
   const componentsRegex = /components:\s*({.*?)\s*6}]/is;
   const minecraftCustomNameRegex = /"minecraft:custom_name"\s*:\s*[^"]*"([^"]*)"/is;
   const idRegex = /id:\s*"([^"]+)"\s*}$/i;
-
+  data = data.replaceAll("minecraft:");
   let count = extractValue(countRegex, data);
   let slot = extractValue(slotRegex, data);
   let components = extractValue(componentsRegex, data);
   let minecraftCustomName = extractValue(minecraftCustomNameRegex, data);
-  let id = extractValue(idRegex, data).replace("minecraft:", "");
-  // if (components){
-  //   console.log(`${id} : ` ,components);
-  // }
+  let id = extractValue(idRegex, data);
+
   return {
-      count,
-      Slot: slot,
-      components: components || "",
-      minecraftCustomName: minecraftCustomName || "",
-      id,
+    count: count,
+    Slot: slot,
+    components: components || "",
+    minecraftCustomName: minecraftCustomName || "",
+    id: id,
   };
 }
