@@ -45,7 +45,7 @@
       {#key uuid}
         <div class="select-none w-[15em] h-full">
           <NoiseContainer bg="#F0F0F0" noise={0}>
-            <!-- <PlayerModel bind:uuid/> -->
+            <PlayerModel bind:uuid/>
             <img id="followImage" src={`https://mc-heads.net/body/${uuid}`} alt={playerName} title={playerName} class="px-8 bg-black h-full object-contain min-w-[200px]"/>
           </NoiseContainer>
         </div>
