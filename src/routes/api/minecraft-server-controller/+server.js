@@ -201,7 +201,7 @@ function extractValues(data) {
   const componentsRegex = /components:\s*({.*?)\s*6}]/is;
   const minecraftCustomNameRegex = /"minecraft:custom_name"\s*:\s*[^"]*"([^"]*)"/is;
   const idRegex = /id:\s*"([^"]+)"\s*}$/i;
-  data = data.replaceAll("minecraft:");
+  data = data.replaceAll("minecraft:", "");
   let count = extractValue(countRegex, data);
   let slot = extractValue(slotRegex, data);
   let components = extractValue(componentsRegex, data);
