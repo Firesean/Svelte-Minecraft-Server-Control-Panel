@@ -81,13 +81,13 @@ async function getPlayers(rcon) {
 
   const onlinePlayerUUIDs = Object.values(playerObject.onlinePlayers);
   const { data: dbPlayers } = await supabase.from('players').select('username, uuid').order('username', { ascending: true });
-
-  const filteredOfflinePlayers = dbPlayers.filter(player => !onlinePlayerUUIDs.includes(player.uuid));
-  playerObject.offlinePlayers = filteredOfflinePlayers.reduce((acc, player) => {
-    acc[player.username] = player.uuid;
-    return acc;
-  }, {});
-
+  if (dbPlayers){
+    const filteredOfflinePlayers = dbPlayers.filter(player => !onlinePlayerUUIDs.includes(player.uuid));
+    playerObject.offlinePlayers = filteredOfflinePlayers.reduce((acc, player) => {
+      acc[player.username] = player.uuid;
+      return acc;
+    }, {});
+  }
   return playerObject;
 }
 
